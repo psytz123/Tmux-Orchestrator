@@ -1,0 +1,18 @@
+{
+  "counter": 2,
+  "active": {
+    "debug-test:1": {
+      "id": "TASK-20250807-0002",
+      "agent": "debug-test:1",
+      "objective": "Debug test task",
+      "mcp_tool": "mcp__filesystem",
+      "success_criteria": "Task logged",
+      "time_limit": 5,
+      "assigned_at": "2025-08-07 18:59:33.923893",
+      "status": "assigned",
+      "completed_at": null,
+      "result": null
+    }
+  },
+  "completed": []
+}

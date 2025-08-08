@@ -2,12 +2,30 @@
 
 **Run AI agents 24/7 while you sleep** - The Tmux Orchestrator enables Claude agents to work autonomously, schedule their own check-ins, and coordinate across multiple projects without human intervention.
 
+## 📚 Essential Reading: tmux-bible.md
+
+**Before starting, READ THIS FIRST:**
+`/mnt/c/Users/psytz/TMUX Final/Tmux-Orchestrator/tmux-bible.md`
+
+This critical document contains hard-learned lessons from $1000s in wasted credits, including:
+- Why V1 failed (manual orchestration doesn't work)
+- Why V2 failed (PMs need proactive monitoring)
+- How to prevent work loss (git discipline)
+- Credit optimization strategies
+- Agent compliance tactics
+
+⚠️ **Warning**: Ignoring tmux-bible.md will result in repeating expensive mistakes!
+
 ## 🤖 Key Capabilities & Autonomous Features
 
 - **Self-trigger** - Agents schedule their own check-ins and continue work autonomously
 - **Coordinate** - Project managers assign tasks to engineers across multiple codebases  
 - **Persist** - Work continues even when you close your laptop
 - **Scale** - Run multiple teams working on different projects simultaneously
+- **MCP-First** - 5-10x faster development with Model Context Protocol tools
+- **Auto-Commit** - Prevents work loss with automatic git commits every 30 minutes
+- **Cross-Window Intelligence** - Proactive error detection and resolution across all agents
+- **Compliance Monitoring** - Enforces MCP usage with automated strike system
 
 ## 🏗️ Architecture
 
@@ -54,6 +72,21 @@ The Tmux Orchestrator uses a three-tier hierarchy to overcome context window lim
 ![Project Completed](Examples/Project%20Completed.png)
 *Successful project completion with all tasks verified and committed*
 
+## 🚀 Automated Launch
+
+Start the entire orchestrator system with all monitoring:
+
+```bash
+# Launch orchestrator with auto-commit, error detection, and MCP monitoring
+./launch_orchestrator.sh
+
+# This automatically starts:
+# - Auto-commit system (30-minute intervals)
+# - Cross-window error monitoring (30-second checks)
+# - MCP compliance monitoring (2-minute checks)
+# - Orchestrator session ready for Claude
+```
+
 ## 🎯 Quick Start
 
 ### Option 1: Basic Setup (Single Project)
@@ -79,7 +112,7 @@ EOF
 tmux new-session -s my-project
 
 # 3. Start project manager in window 0
-claude
+claude --dangerously-skip-permissions
 
 # 4. Give PM the spec and let it create an engineer
 "You are a Project Manager. Read project_spec.md and create an engineer 
@@ -94,7 +127,7 @@ in window 1 to implement it. Schedule check-ins every 30 minutes."
 ```bash
 # Start the orchestrator
 tmux new-session -s orchestrator
-claude
+claude --dangerously-skip-permissions
 
 # Give it your projects
 "You are the Orchestrator. Set up project managers for:
@@ -115,16 +148,34 @@ Agents can schedule their own check-ins using:
 - Project managers communicate with engineers
 - Orchestrator monitors all project managers
 - Cross-project knowledge sharing
+- Single-task protocol prevents agent confusion
 
 ### 💾 Automatic Git Backups
-- Commits every 30 minutes of work
-- Tags stable versions
+- Commits every 30 minutes of work automatically
+- Tags stable versions every 6 commits
 - Creates feature branches for experiments
+- MCP git integration for faster operations
 
 ### 📊 Real-Time Monitoring
 - See what every agent is doing
+- Proactive error detection across all windows
+- MCP compliance tracking with strike system
 - Intervene when needed
 - Review progress across all projects
+
+### ⚡ MCP-First Development (5-10x Faster)
+- `mcp__filesystem` replaces slow Read/Write operations
+- `mcp__git` for instant version control
+- `mcp__memory` for persistent knowledge sharing
+- Framework-specific patterns via `mcp__[framework]`
+- Direct database access with `mcp__postgres`
+
+### 🛡️ Advanced Safety Systems
+- **Auto-commit monitoring**: Prevents work loss
+- **Cross-window intelligence**: Catches errors before they cascade
+- **MCP compliance enforcement**: 3-strike system for non-compliant agents
+- **Single-task assignment**: Prevents context overload
+- **Ephemeral agents**: Limited-lifespan agents for focused tasks
 
 ## 📋 Best Practices
 
@@ -176,13 +227,16 @@ SUCCESS CRITERIA:
 
 ## 🚨 Common Pitfalls & Solutions
 
-| Pitfall | Consequence | Solution |
-|---------|-------------|----------|
-| Vague instructions | Agent drift, wasted compute | Write clear, specific specs |
-| No git commits | Lost work, frustrated devs | Enforce 30-minute commit rule |
-| Too many tasks | Context overload, confusion | One task per agent at a time |
-| No specifications | Unpredictable results | Always start with written spec |
-| Missing checkpoints | Agents stop working | Schedule regular check-ins |
+| Pitfall | Consequence | Solution | tmux-bible.md Reference |
+|---------|-------------|----------|------------------------|
+| Vague instructions | Agent drift, wasted compute | Write clear, specific specs | Section: "Agent Psychology" |
+| No git commits | Lost work, frustrated devs | Enforce 30-minute commit rule | Section: "Git Discipline" |
+| Too many tasks | Context overload, confusion | One task per agent at a time | Section: "Single Task Protocol" |
+| No specifications | Unpredictable results | Always start with written spec | Section: "Clear Requirements" |
+| Missing checkpoints | Agents stop working | Schedule regular check-ins | Section: "PM Oversight" |
+| Ignoring MCP tools | 5-10x slower, credit waste | Use MCP exclusively | Section: "MCP Enforcement" |
+
+📖 **For detailed solutions, see:** `/mnt/c/Users/psytz/TMUX Final/Tmux-Orchestrator/tmux-bible.md`
 
 ## 🛠️ How It Works
 
@@ -246,11 +300,13 @@ The orchestrator can share insights between projects:
 
 ## 📚 Core Files
 
+- **`tmux-bible.md`** - 🔴 **CRITICAL: Must-read lessons from expensive failures**
 - `send-claude-message.sh` - Simplified agent communication script
 - `schedule_with_note.sh` - Self-scheduling functionality
 - `tmux_utils.py` - Tmux interaction utilities
-- `CLAUDE.md` - Agent behavior instructions
+- `CLAUDE.md` - Agent behavior instructions (includes tmux-bible references)
 - `LEARNINGS.md` - Accumulated knowledge base
+- `launch_orchestrator.sh` - Automated system startup with monitoring
 
 ## 🤝 Contributing & Optimization
 

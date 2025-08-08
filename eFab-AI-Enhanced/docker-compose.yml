@@ -1,0 +1,148 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: efab-postgres
+    environment:
+      POSTGRES_USER: efab_user
+      POSTGRES_PASSWORD: efab_password
+      POSTGRES_DB: efab_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - efab-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U efab_user -d efab_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: efab-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - efab-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # FastAPI Backend
+  api:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.api
+    container_name: efab-api
+    environment:
+      DATABASE_URL: postgresql://efab_user:efab_password@postgres:5432/efab_db
+      REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: redis://redis:6379/1
+      CELERY_RESULT_BACKEND: redis://redis:6379/2
+      ENV: docker
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./src:/app/src
+      - ./models:/app/models
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - efab-network
+    command: uvicorn src.api.app:app --host 0.0.0.0 --port 8000 --reload
+
+  # Streamlit UI
+  ui:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.ui
+    container_name: efab-ui
+    environment:
+      API_URL: http://api:8000
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./src/ui:/app/src/ui
+    depends_on:
+      - api
+    networks:
+      - efab-network
+    command: streamlit run src/ui/app.py --server.port 8501 --server.address 0.0.0.0
+
+  # Celery Worker
+  celery-worker:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.api
+    container_name: efab-celery-worker
+    environment:
+      DATABASE_URL: postgresql://efab_user:efab_password@postgres:5432/efab_db
+      REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: redis://redis:6379/1
+      CELERY_RESULT_BACKEND: redis://redis:6379/2
+    volumes:
+      - ./src:/app/src
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - efab-network
+    command: celery -A src.workers.celery_app worker --loglevel=info
+
+  # Celery Beat Scheduler
+  celery-beat:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.api
+    container_name: efab-celery-beat
+    environment:
+      DATABASE_URL: postgresql://efab_user:efab_password@postgres:5432/efab_db
+      REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: redis://redis:6379/1
+      CELERY_RESULT_BACKEND: redis://redis:6379/2
+    volumes:
+      - ./src:/app/src
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - efab-network
+    command: celery -A src.workers.celery_app beat --loglevel=info
+
+  # Flower - Celery Monitoring
+  flower:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.api
+    container_name: efab-flower
+    environment:
+      CELERY_BROKER_URL: redis://redis:6379/1
+      CELERY_RESULT_BACKEND: redis://redis:6379/2
+    ports:
+      - "5555:5555"
+    depends_on:
+      - redis
+    networks:
+      - efab-network
+    command: celery -A src.workers.celery_app flower --port=5555
+
+networks:
+  efab-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:

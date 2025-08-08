@@ -1,5 +1,30 @@
 # Claude.md - Tmux Orchestrator Project Knowledge Base
 
+## 📖 ESSENTIAL READING: Always Refer to tmux-bible.md
+
+**MANDATORY**: Before making any architectural decisions or when troubleshooting issues, ALWAYS consult:
+`/mnt/c/Users/psytz/TMUX Final/Tmux-Orchestrator/tmux-bible.md`
+
+This document contains:
+- Critical lessons learned from V1/V2 failures
+- Credit optimization strategies (every message costs money)
+- Common pitfalls and their solutions
+- Proven patterns that work
+- What NOT to do (learned the hard way)
+
+**Remember**: "Those who don't learn from tmux-bible.md are doomed to repeat expensive mistakes."
+
+## 🚨 CRITICAL UPDATE: MCP-First Development Protocol Active
+
+**ALL AGENTS MUST USE MCP TOOLS EXCLUSIVELY - NO EXCEPTIONS**
+
+This orchestrator now implements advanced Agent-MCP patterns:
+- Ephemeral agents with limited, focused contexts
+- Shared knowledge graph via mcp__memory
+- File-level locking to prevent conflicts
+- Automated compliance monitoring with strike system
+- Cross-window intelligence for proactive error detection
+
 ## Project Overview
 The Tmux Orchestrator is an AI-powered session management system where Claude acts as the orchestrator for multiple Claude agents across tmux sessions, managing codebases and keeping development moving forward 24/7.
 
@@ -30,6 +55,34 @@ As the Orchestrator, you maintain high-level oversight without getting bogged do
 5. **Code Reviewer**: Security and best practices
 6. **Researcher**: Technology evaluation
 7. **Documentation Writer**: Technical documentation
+8. **Ephemeral Agents**: Short-lived, task-specific agents with limited context (max 30 min TTL)
+
+## 🎯 MCP-FIRST PROTOCOL - MANDATORY
+
+### You MUST Use MCP Tools Exclusively
+
+**FORBIDDEN TOOLS (will trigger immediate strike):**
+- ❌ Read() - Use `mcp__filesystem.read_file()` instead
+- ❌ Write() - Use `mcp__filesystem.write_file()` instead  
+- ❌ Bash git commands - Use `mcp__git` operations instead
+- ❌ Python open() - Use `mcp__filesystem` instead
+- ❌ Web search for code patterns - Use `mcp__[framework].get_example()` instead
+
+**REQUIRED MCP TOOLS:**
+- ✅ `mcp__filesystem` - All file operations (5-10x faster)
+- ✅ `mcp__git` - All version control
+- ✅ `mcp__memory` - Knowledge persistence and sharing
+- ✅ `mcp__[framework]` - Framework-specific patterns (fastapi, scikit-learn, etc.)
+- ✅ `mcp__postgres` - Direct database access
+
+### Compliance Monitoring Active
+
+Your MCP usage is monitored in real-time by `scripts/verify_mcp_usage.py`:
+- Every operation is tracked
+- Non-MCP tool usage triggers automatic strikes
+- Strike 1: Warning with corrective action
+- Strike 2: Final warning (2 minutes to comply)
+- Strike 3: Immediate replacement
 
 ## 🔐 Git Discipline - MANDATORY FOR ALL AGENTS
 
@@ -38,10 +91,10 @@ As the Orchestrator, you maintain high-level oversight without getting bogged do
 **CRITICAL**: Every agent MUST follow these git practices to prevent work loss:
 
 1. **Auto-Commit Every 30 Minutes**
-   ```bash
-   # Set a timer/reminder to commit regularly
-   git add -A
-   git commit -m "Progress: [specific description of what was done]"
+   ```python
+   # Use MCP git for all commits
+   mcp__git.add_all()
+   mcp__git.commit(f"Progress: {specific_description}")
    ```
 
 2. **Commit Before Task Switches**
@@ -102,6 +155,70 @@ Project Managers must enforce git discipline:
 - **Rollback Safety**: Can always return to a working state
 - **Progress Tracking**: Clear history of what was accomplished
 
+## 📋 Single-Task Protocol
+
+### One Task At A Time - NO EXCEPTIONS
+
+Complex multi-step instructions confuse agents and waste credits. You will receive tasks in this format:
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📋 TASK-20241207-0001
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+OBJECTIVE: [Single, clear goal]
+MCP TOOL: [Primary MCP tool to use]
+SUCCESS CRITERIA: [Measurable outcome]
+TIME LIMIT: 15 minutes
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+**Rules:**
+- Complete the current task before anything else
+- Report blockers immediately with exact error
+- If time limit exceeded, report status
+- Never start new work until task marked complete
+
+Tasks are assigned by `scripts/task_assigner.py` and tracked centrally.
+
+## 🔍 Cross-Window Intelligence Active
+
+The orchestrator monitors ALL windows for errors using `monitoring/cross_window_monitor.py`:
+
+- Detects 30+ error patterns automatically
+- Provides proactive assistance before you ask
+- Suggests solutions for common issues
+- Alerts orchestrator to critical problems
+
+**What This Means For You:**
+- The orchestrator may message you with solutions before you report issues
+- Your errors are visible across windows - no need to hide problems
+- Faster resolution through proactive detection
+- Less time wasted on known issues
+
+## 📚 Knowledge Graph Protocol
+
+### Use mcp__memory for All Discoveries
+
+```python
+# Before solving any problem
+existing = mcp__memory.search("error keywords")
+if existing:
+    apply_solution(existing)
+else:
+    # Solve problem
+    solution = solve_problem()
+    mcp__memory.store(f"solution_{timestamp}", solution)
+```
+
+**Required Memory Entries:**
+- Problem descriptions before coding
+- Solutions after fixing issues
+- Patterns discovered during work
+- Performance optimizations found
+- Framework-specific insights
+
+This shared knowledge helps all agents learn from each other.
+
 ## Startup Behavior - Tmux Window Naming
 
 ### Auto-Rename Feature
@@ -124,8 +241,8 @@ Windows should be named based on their actual function:
 tmux rename-window -t session:window-index "New-Name"
 
 # Example:
-tmux rename-window -t ai-chat:0 "Claude-Convex"
-tmux rename-window -t glacier-backend:3 "Uvicorn-API"
+tmux rename-window -t session:0 "Claude-Frontend"
+tmux rename-window -t session:3 "Backend-API"
 ```
 
 ### Benefits
@@ -142,18 +259,21 @@ Follow this systematic sequence to start any project:
 
 #### 1. Find the Project
 ```bash
-# List all directories in ~/Coding to find projects
-ls -la ~/Coding/ | grep "^d" | awk '{print $NF}' | grep -v "^\."
+# List all directories in your projects folder to find projects
+# Note: Adjust PROJECT_DIR to match your setup (e.g., ~/Coding, ~/Projects, etc.)
+PROJECT_DIR="~/Coding"  # Change this to your projects directory
+ls -la "$PROJECT_DIR" | grep "^d" | awk '{print $NF}' | grep -v "^\."
 
 # If project name is ambiguous, list matches
-ls -la ~/Coding/ | grep -i "task"  # for "task templates"
+ls -la "$PROJECT_DIR" | grep -i "task"  # for "task templates"
 ```
 
 #### 2. Create Tmux Session
 ```bash
 # Create session with project name (use hyphens for spaces)
 PROJECT_NAME="task-templates"  # or whatever the folder is called
-PROJECT_PATH="/Users/jasonedward/Coding/$PROJECT_NAME"
+PROJECT_DIR="~/Coding"  # Change this to match your projects directory
+PROJECT_PATH="$PROJECT_DIR/$PROJECT_NAME"
 tmux new-session -d -s $PROJECT_NAME -c "$PROJECT_PATH"
 ```
 
@@ -172,7 +292,7 @@ tmux new-window -t $PROJECT_NAME -n "Dev-Server" -c "$PROJECT_PATH"
 #### 4. Brief the Claude Agent
 ```bash
 # Send briefing message to Claude agent
-tmux send-keys -t $PROJECT_NAME:0 "claude" Enter
+tmux send-keys -t $PROJECT_NAME:0 "claude --dangerously-skip-permissions" Enter
 sleep 5  # Wait for Claude to start
 
 # Send the briefing
@@ -249,19 +369,20 @@ tmux capture-pane -t $PROJECT_NAME:2 -p | grep -i error
 ### Example: Starting "Task Templates" Project
 ```bash
 # 1. Find project
-ls -la ~/Coding/ | grep -i task
+PROJECT_DIR="~/Coding"  # Your projects directory
+ls -la "$PROJECT_DIR" | grep -i task
 # Found: task-templates
 
 # 2. Create session
-tmux new-session -d -s task-templates -c "/Users/jasonedward/Coding/task-templates"
+tmux new-session -d -s task-templates -c "$PROJECT_DIR/task-templates"
 
 # 3. Set up windows
 tmux rename-window -t task-templates:0 "Claude-Agent"
-tmux new-window -t task-templates -n "Shell" -c "/Users/jasonedward/Coding/task-templates"
-tmux new-window -t task-templates -n "Dev-Server" -c "/Users/jasonedward/Coding/task-templates"
+tmux new-window -t task-templates -n "Shell" -c "$PROJECT_DIR/task-templates"
+tmux new-window -t task-templates -n "Dev-Server" -c "$PROJECT_DIR/task-templates"
 
 # 4. Start Claude and brief
-tmux send-keys -t task-templates:0 "claude" Enter
+tmux send-keys -t task-templates:0 "claude --dangerously-skip-permissions" Enter
 # ... (briefing as above)
 ```
 
@@ -296,7 +417,7 @@ tmux new-window -t [session] -n "Project-Manager" -c "$PROJECT_PATH"
 #### 3. Start and Brief the PM
 ```bash
 # Start Claude
-tmux send-keys -t [session]:[PM-window] "claude" Enter
+tmux send-keys -t [session]:[PM-window] "claude --dangerously-skip-permissions" Enter
 sleep 5
 
 # Send PM-specific briefing
@@ -409,7 +530,7 @@ tmux new-window -t [session] -n "TEMP-CodeReview"
 ```bash
 # 1. Capture complete conversation
 tmux capture-pane -t [session]:[window] -S - -E - > \
-  ~/Coding/Tmux\ orchestrator/registry/logs/[session]_[role]_$(date +%Y%m%d_%H%M%S).log
+  ./registry/logs/[session]_[role]_$(date +%Y%m%d_%H%M%S).log
 
 # 2. Create summary of work completed
 echo "=== Agent Summary ===" >> [logfile]
@@ -423,7 +544,7 @@ tmux kill-window -t [session]:[window]
 
 ### Agent Logging Structure
 ```
-~/Coding/Tmux orchestrator/registry/
+./registry/
 ├── logs/            # Agent conversation logs
 ├── sessions.json    # Active session tracking
 └── notes/           # Orchestrator notes and summaries
@@ -446,6 +567,82 @@ PMs should implement:
 3. Performance benchmarking
 4. Security scanning
 5. Documentation audits
+
+## 🔍 Cross-Window Intelligence System
+
+### Automated Error Detection
+The `monitoring/cross_window_monitor.py` continuously scans all tmux windows for:
+- Port conflicts
+- Module import errors
+- Permission denied issues
+- Database connection failures
+- API endpoint errors
+- Build/compilation failures
+- 30+ error patterns with solution suggestions
+
+### Proactive Intervention
+When errors are detected:
+1. Orchestrator receives immediate alert
+2. Error context and suggested fix provided
+3. Can intervene before agent wastes credits
+
+### Monitoring Commands
+```bash
+# Check current errors
+python3 monitoring/cross_window_monitor.py --report
+
+# View error history
+tail -50 monitoring/error_detection.log
+
+# Monitor specific session
+python3 monitoring/cross_window_monitor.py --session project-name
+```
+
+## 📝 Single-Task Assignment Protocol
+
+### Preventing Agent Confusion
+Each agent receives exactly ONE task at a time:
+```json
+{
+  "task_id": "TASK-001",
+  "objective": "Implement user login endpoint",
+  "success_criteria": ["Returns JWT token", "Validates credentials", "Has rate limiting"],
+  "time_limit": 15,
+  "resources": ["database schema", "auth library docs"]
+}
+```
+
+### Task Management
+```bash
+# Assign new task
+python3 scripts/task_assigner.py --assign session:window '{"objective": "..."}'
+
+# Check task status
+python3 scripts/task_assigner.py --status session:window
+
+# Complete task
+python3 scripts/task_assigner.py --complete session:window
+```
+
+## 🤖 Ephemeral Agent Management
+
+### Creating Short-Lived Agents
+For focused, time-limited tasks:
+```python
+# Via agent_mcp_integration.py
+create_ephemeral_agent(
+    task="Review security vulnerabilities",
+    ttl_minutes=30,
+    context_limit=8000,
+    auto_terminate=True
+)
+```
+
+### Benefits
+- Smaller context = better focus
+- Auto-terminates after task
+- No context pollution
+- Maximum 10 concurrent agents
 
 ## Communication Rules
 
@@ -477,7 +674,7 @@ echo "Current window: $CURRENT_WINDOW"
 
 The `schedule_with_note.sh` script MUST:
 - Accept a third parameter for target window: `./schedule_with_note.sh <minutes> "<note>" <target_window>`
-- Default to `tmux-orc:0` if no target specified
+- Default to `orchestrator:0` if no target specified
 - Always verify the target window exists before scheduling
 
 ### Why This Matters
@@ -494,7 +691,48 @@ CURRENT_WINDOW=$(tmux display-message -p "#{session_name}:#{window_index}")
 ./schedule_with_note.sh 15 "Regular PM oversight check" "$CURRENT_WINDOW"
 
 # For scheduling other agents, specify their windows explicitly
-./schedule_with_note.sh 30 "Developer progress check" "ai-chat:2"
+./schedule_with_note.sh 30 "Developer progress check" "session:2"
+```
+
+## 📊 Orchestrator Monitoring Dashboard
+
+### Active Monitoring Systems
+When running as orchestrator, you have three monitoring systems providing real-time intelligence:
+
+#### 1. Auto-Commit Monitor (Window: auto-commit)
+- Runs every 30 minutes
+- Commits all agent work automatically
+- Prevents work loss from crashes/errors
+- Tags stable versions every 6 commits
+- Check status: `tmux capture-pane -t tmux-orchestrator:auto-commit -p | tail -20`
+
+#### 2. Cross-Window Error Monitor (Window: cross-monitor)
+- Runs every 30 seconds
+- Detects 30+ error patterns
+- Provides solution suggestions
+- Alerts on critical issues
+- Check status: `tmux capture-pane -t tmux-orchestrator:cross-monitor -p | tail -20`
+
+#### 3. MCP Compliance Monitor (Window: mcp-monitor)
+- Runs every 2 minutes
+- Tracks MCP tool usage
+- Issues strikes for violations
+- Enforces MCP-first development
+- Check status: `tmux capture-pane -t tmux-orchestrator:mcp-monitor -p | tail -20`
+
+### Quick Status Commands
+```bash
+# Overall system health
+tmux list-windows -t tmux-orchestrator
+
+# Check for recent errors
+grep ERROR monitoring/*.log | tail -10
+
+# View MCP violations
+grep VIOLATION monitoring/mcp_compliance.log | tail -10
+
+# See recent commits
+grep "commit successful" monitoring/git_commits.log | tail -10
 ```
 
 ## Anti-Patterns to Avoid
@@ -505,8 +743,30 @@ CURRENT_WINDOW=$(tmux display-message -p "#{session_name}:#{window_index}")
 - ❌ **Micromanagement**: Trust agents to work
 - ❌ **Quality Shortcuts**: Never compromise standards
 - ❌ **Blind Scheduling**: Never schedule without verifying target window
+- ❌ **Ignoring MCP Tools**: Will trigger automatic replacement
+- ❌ **Manual Git Commands**: Use mcp__git exclusively
+- ❌ **Context Overload**: One task per agent maximum
 
 ## Critical Lessons Learned
+
+### 📚 The tmux-bible.md - Your Primary Reference
+
+**ALWAYS CHECK tmux-bible.md FIRST** when you encounter:
+- Credit usage concerns
+- Agent non-compliance issues  
+- Work loss situations
+- Communication breakdowns
+- Scheduling problems
+- Window management confusion
+
+Path: `/mnt/c/Users/psytz/TMUX Final/Tmux-Orchestrator/tmux-bible.md`
+
+Key sections to review:
+1. **V1 Failures**: Why manual orchestration failed
+2. **V2 Lessons**: PM oversight requirements
+3. **Credit Management**: Every message costs money
+4. **Git Discipline**: Preventing work loss
+5. **Agent Psychology**: Making agents comply
 
 ### Tmux Window Management Mistakes and Solutions
 
@@ -622,20 +882,20 @@ When a command fails:
 #### Using send-claude-message.sh
 ```bash
 # Basic usage - ALWAYS use this instead of manual tmux commands
-/Users/jasonedward/Coding/Tmux\ orchestrator/send-claude-message.sh <target> "message"
+./send-claude-message.sh <target> "message"
 
 # Examples:
 # Send to a window
-/Users/jasonedward/Coding/Tmux\ orchestrator/send-claude-message.sh agentic-seek:3 "Hello Claude!"
+./send-claude-message.sh session:3 "Hello Claude!"
 
 # Send to a specific pane in split-screen
-/Users/jasonedward/Coding/Tmux\ orchestrator/send-claude-message.sh tmux-orc:0.1 "Message to pane 1"
+./send-claude-message.sh session:0.1 "Message to pane 1"
 
 # Send complex instructions
-/Users/jasonedward/Coding/Tmux\ orchestrator/send-claude-message.sh glacier-backend:0 "Please check the database schema for the campaigns table and verify all columns are present"
+./send-claude-message.sh backend:0 "Please check the database schema for the campaigns table and verify all columns are present"
 
 # Send status update requests
-/Users/jasonedward/Coding/Tmux\ orchestrator/send-claude-message.sh ai-chat:2 "STATUS UPDATE: What's your current progress on the authentication implementation?"
+./send-claude-message.sh frontend:2 "STATUS UPDATE: What's your current progress on the authentication implementation?"
 ```
 
 #### Why Use the Script?
@@ -646,7 +906,7 @@ When a command fails:
 5. **Consistent messaging**: All agents receive messages the same way
 
 #### Script Location and Usage
-- **Location**: `/Users/jasonedward/Coding/Tmux orchestrator/send-claude-message.sh`
+- **Location**: `./send-claude-message.sh` (in the orchestrator directory)
 - **Permissions**: Already executable, ready to use
 - **Arguments**: 
   - First: target (session:window or session:window.pane)
@@ -657,38 +917,38 @@ When a command fails:
 ##### 1. Starting Claude and Initial Briefing
 ```bash
 # Start Claude first
-tmux send-keys -t project:0 "claude" Enter
+tmux send-keys -t project:0 "claude --dangerously-skip-permissions" Enter
 sleep 5
 
 # Then use the script for the briefing
-/Users/jasonedward/Coding/Tmux\ orchestrator/send-claude-message.sh project:0 "You are responsible for the frontend codebase. Please start by analyzing the current project structure and identifying any immediate issues."
+./send-claude-message.sh project:0 "You are responsible for the frontend codebase. Please start by analyzing the current project structure and identifying any immediate issues."
 ```
 
 ##### 2. Cross-Agent Coordination
 ```bash
 # Ask frontend agent about API usage
-/Users/jasonedward/Coding/Tmux\ orchestrator/send-claude-message.sh frontend:0 "Which API endpoints are you currently using from the backend?"
+./send-claude-message.sh frontend:0 "Which API endpoints are you currently using from the backend?"
 
 # Share info with backend agent
-/Users/jasonedward/Coding/Tmux\ orchestrator/send-claude-message.sh backend:0 "Frontend is using /api/v1/campaigns and /api/v1/flows endpoints"
+./send-claude-message.sh backend:0 "Frontend is using /api/v1/campaigns and /api/v1/flows endpoints"
 ```
 
 ##### 3. Status Checks
 ```bash
 # Quick status request
-/Users/jasonedward/Coding/Tmux\ orchestrator/send-claude-message.sh session:0 "Quick status update please"
+./send-claude-message.sh session:0 "Quick status update please"
 
 # Detailed status request
-/Users/jasonedward/Coding/Tmux\ orchestrator/send-claude-message.sh session:0 "STATUS UPDATE: Please provide: 1) Completed tasks, 2) Current work, 3) Any blockers"
+./send-claude-message.sh session:0 "STATUS UPDATE: Please provide: 1) Completed tasks, 2) Current work, 3) Any blockers"
 ```
 
 ##### 4. Providing Assistance
 ```bash
 # Share error information
-/Users/jasonedward/Coding/Tmux\ orchestrator/send-claude-message.sh session:0 "I see in your server window that port 3000 is already in use. Try port 3001 instead."
+./send-claude-message.sh session:0 "I see in your server window that port 3000 is already in use. Try port 3001 instead."
 
 # Guide stuck agents
-/Users/jasonedward/Coding/Tmux\ orchestrator/send-claude-message.sh session:0 "The error you're seeing is because the virtual environment isn't activated. Run 'source venv/bin/activate' first."
+./send-claude-message.sh session:0 "The error you're seeing is because the virtual environment isn't activated. Run 'source venv/bin/activate' first."
 ```
 
 #### OLD METHOD (DO NOT USE)
@@ -699,14 +959,14 @@ sleep 1
 tmux send-keys -t session:window Enter
 
 # ✅ DO THIS INSTEAD:
-/Users/jasonedward/Coding/Tmux\ orchestrator/send-claude-message.sh session:window "message"
+./send-claude-message.sh session:window "message"
 ```
 
 #### Checking for Responses
 After sending a message, check for the response:
 ```bash
 # Send message
-/Users/jasonedward/Coding/Tmux\ orchestrator/send-claude-message.sh session:0 "What's your status?"
+./send-claude-message.sh session:0 "What's your status?"
 
 # Wait a bit for response
 sleep 5

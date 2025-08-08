@@ -1,0 +1,33 @@
+FROM python:3.11-slim
+
+# Set working directory
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    gcc \
+    g++ \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements (only UI-related packages)
+COPY requirements.txt .
+
+# Install Python dependencies
+RUN pip install --no-cache-dir streamlit pandas plotly requests python-dotenv
+
+# Copy UI code
+COPY src/ui/ ./src/ui/
+
+# Set Python path
+ENV PYTHONPATH=/app
+
+# Expose Streamlit port
+EXPOSE 8501
+
+# Streamlit configuration
+RUN mkdir -p ~/.streamlit
+RUN echo "[server]\nheadless = true\nenableCORS = false\n" > ~/.streamlit/config.toml
+
+# Default command
+CMD ["streamlit", "run", "src/ui/app.py", "--server.port", "8501", "--server.address", "0.0.0.0"]
